@@ -124,23 +124,28 @@ class TaskService {
 
     public async getExpiredTasks(userId: number, date: string): Promise<{ recorrente: any[], naoRecorrente: any[], error?: unknown }> {
         try {
-            let tasks: any = []
-            tasks = await this.taskRepository
+            let tasks: any = await this.taskRepository
                 .createQueryBuilder("task")
+                .leftJoinAndSelect("task.users", "users")
+                .addSelect(["users.email"])
                 .where("task.userId = :userId", { userId })
                 .andWhere("task.deadline = :date", { date })
                 .getMany();
-            const recorente = tasks.filter((task: Task) => { return task.customInterval > 0 })
-            const naoRecorente = tasks.filter((task: Task) => { return task.customInterval === 0 })
+    
+            const recorente = tasks.filter((task: Task) => task.customInterval > 0);
+            const naoRecorente = tasks.filter((task: Task) => task.customInterval === 0);
+    
             const pastCycleTasks = await this.mongoTaskRepository.find({ where: { userId: userId, deadline: date } });
             const futureCycleTasks = await this.mongoFutureTaskRepository.find({ where: { userId: userId, deadline: date } });
+    
             const retorno = { recorrente: [...recorente, ...pastCycleTasks, ...futureCycleTasks], naoRecorrente: [...naoRecorente] };
-            return retorno
+            return retorno;
         } catch (error) {
-            console.log(error)
+            console.log(error);
             return { recorrente: [], naoRecorrente: [] };
         }
     }
+    
 
     public async getTimeSpentByMonth(userId: number, month: number) {
         try {
