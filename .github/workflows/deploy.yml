@@ -4,13 +4,17 @@ on:
   push:
     branches:
       - main
+      - develop
+
 jobs:
-  deploy:
+  deploy-main:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
+        with:
+          path: /home/azureuser/API-2023.2-Back-End # Ajuste o caminho para o local correto
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
@@ -18,23 +22,23 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_AZURE }}
 
       - name: Atualizar o Git com a Main
+        if: github.ref == 'refs/heads/main'
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && git pull origin main"
+
       - name: Rodar o PM2
+        if: github.ref == 'refs/heads/main'
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && PORT_PRODUCTION=4000 /home/azureuser/.nvm/versions/node/v20.8.0/bin/pm2 start ecosystem.config.js --only oracle-backend-production"
 
-on:
-  push:
-    branches:
-      - develop
-jobs:
-  deploy:
+  deploy-develop:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
+        with:
+          path: /home/azureuser/API-2023.2-Back-End # Ajuste o caminho para o local correto
 
       - name: Configurações da SSH
         uses: webfactory/ssh-agent@v0.7.0
@@ -42,9 +46,11 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_AZURE }}
 
       - name: Atualizar o Git com a Develop
+        if: github.ref == 'refs/heads/develop'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && git pull origin main"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && git pull origin develop"
+
       - name: Rodar o PM2
+        if: github.ref == 'refs/heads/develop'
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && /home/azureuser/.nvm/versions/node/v20.8.0/bin/pm2 start ecosystem.config.js --only oracle-backend-production"
-
