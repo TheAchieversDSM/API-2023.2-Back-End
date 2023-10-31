@@ -13,9 +13,7 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
-        with:
-          path: /home/azureuser/API-2023.2-Back-End # Ajuste o caminho para o local correto
-
+        
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
@@ -37,8 +35,6 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v3
-        with:
-          path: /home/azureuser/API-2023.2-Back-End # Ajuste o caminho para o local correto
 
       - name: Configurações da SSH
         uses: webfactory/ssh-agent@v0.7.0
