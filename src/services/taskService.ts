@@ -500,7 +500,7 @@ class TaskService {
             findTask.sort((a: IHistorico, b: IHistorico) => {
                 const dataA = new Date(a.data).getTime();
                 const dataB = new Date(b.data).getTime();
-                return dataA - dataB;
+                return dataB - dataA;
             });
             findTask.forEach((task) => {
                 const data = task.data.slice(0, 10);
@@ -524,7 +524,7 @@ class TaskService {
             filteredSearch.sort((a: IHistorico, b: IHistorico) => {
                 const dataA = new Date(a.data).getTime();
                 const dataB = new Date(b.data).getTime();
-                return dataA - dataB;
+                return dataB - dataA;
             });
             const grupoDatas: IDynamicKeyData = {};
             filteredSearch.forEach(task => {
