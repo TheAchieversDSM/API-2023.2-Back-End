@@ -16,6 +16,17 @@ export interface IHistorico {
   };
 }
 
+export interface IDeleteHistorico {
+  id?: ObjectId;
+  taskId: number;
+  date: string;
+  user: {
+    id: number;
+    name: string;
+  };
+  message: string; 
+}
+
 export interface IDynamicKeyData {
   [data: string]: IHistorico[];
 }

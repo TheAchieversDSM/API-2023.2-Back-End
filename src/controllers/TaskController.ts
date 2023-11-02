@@ -303,6 +303,7 @@ class TaskController {
 
   public async deleteTask(req: Request, res: Response) {
     const { id, userId } = req.params;
+    const deleteMessage = req.body.deleteMessage;
 
     try {
         const taskId: number = parseInt(id, 10);
@@ -323,6 +324,9 @@ class TaskController {
                 res.status(500).json({ error: "Internal Server Error" });
             }
         } else {
+            if(deleteMessage){
+              await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
+            }
             res.status(200).json({ message: "Task deleted successfully", data: task });
         }
     } catch (error: any) {
@@ -367,6 +371,32 @@ class TaskController {
       res.json(searchOwner)
     } catch (error) {
 
+    }
+  }
+
+  public async getDeleteHistoricTaskByUser(req: Request, res: Response) {
+    const userId: number = parseInt(req.params.userId, 10)
+    try {
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+      }
+      const tasks = await taskService.getHistoricDeleteTaskByUser(userId)
+      return res.status(200).json(tasks)
+    } catch (error) {
+      return res.status(500).json(error)
+    }
+  }
+
+  public async getHistoricDeleteTask(req: Request, res: Response) {
+    const taskId: number = parseInt(req.params.id, 10)
+    try {
+      if (isNaN(taskId)) {
+        return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+      }
+      const tasks = await taskService.getHistoricDeleteTask(taskId)
+      return res.status(200).json(tasks)
+    } catch (error) {
+      return res.status(500).json(error)
     }
   }
 

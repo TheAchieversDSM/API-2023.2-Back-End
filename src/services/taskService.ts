@@ -9,21 +9,24 @@ import { StatusLevels } from "../models/StatusLevels";
 import { MongoFutureTask } from "../models/MongoFutureTasks";
 import moment, { Moment } from "moment-timezone";
 import { create } from "domain";
-import { IDynamicKeyData, IHistorico } from "../interfaces/historico";
+import { IDeleteHistorico, IDynamicKeyData, IHistorico } from "../interfaces/historico";
 import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
 import { HistoricoTask } from "../models/MongoHisotirico";
+import { DeleteHistoricoTask } from "../models/MongoDeleteHistorico";
 
 class TaskService {
     private taskRepository: Repository<Task>;
     private mongoTaskRepository: Repository<MongoTask>;
     private mongoFutureTaskRepository: Repository<MongoFutureTask>;
     private mongoHistoricoRepository: MongoRepository<HistoricoTask>;
+    private mongoDeleteHistoricoRepository: MongoRepository<DeleteHistoricoTask>;
 
     constructor() {
         this.taskRepository = DataBaseSource.getRepository(Task);
         this.mongoTaskRepository = MongoDataSource.getMongoRepository(MongoTask);
         this.mongoFutureTaskRepository = MongoDataSource.getMongoRepository(MongoFutureTask);
         this.mongoHistoricoRepository = MongoDataSource.getMongoRepository(HistoricoTask);
+        this.mongoDeleteHistoricoRepository = MongoDataSource.getMongoRepository(DeleteHistoricoTask);
     }
 
     public async createTask(task: Task) {
@@ -465,6 +468,7 @@ class TaskService {
         }
     }
 
+    
     public async HistoricEditTask(idTask: number, taskUpdate: TaskUpdateDto, user: { name: string, id: number }) {
         try {
             let historicoEdit: IHistorico = {
@@ -492,7 +496,7 @@ class TaskService {
             throw new Error(error);
         }
     }
-
+    
     public async getHistoricEditTask(idTask: number): Promise<IDynamicKeyData> {
         try {
             const findTask = await this.mongoHistoricoRepository.find({ where: { "taskId": { $eq: idTask } } })
@@ -550,10 +554,10 @@ class TaskService {
         });
         const historicTaskByOwner = (await Promise.all(historicTaskPromises)).flat();
         historicTaskByOwner.sort((a: IHistorico, b: IHistorico) => {
-                const dataA = new Date(a.data).getTime();
-                const dataB = new Date(b.data).getTime();
-                return dataB - dataA;
-            });
+            const dataA = new Date(a.data).getTime();
+            const dataB = new Date(b.data).getTime();
+            return dataB - dataA;
+        });
         historicTaskByOwner.forEach(task => {
             const taskName = listIds.find(filterTask => filterTask.id === task.taskId)?.name;
             if (taskName) {
@@ -565,7 +569,41 @@ class TaskService {
         });
         return grupoNames;
     }
+    
+    public async HistoricDeleteTask(idTask: number, userId: number, message: string) {
+        try{
+            let user = await DataBaseSource.getRepository(User).findOne({ where: { id: userId } });
+            let DeleteHistoricoTask: IDeleteHistorico = {
+                taskId: idTask,
+                user : {id: user?.id as number, name: user?.name as string},
+                date: new Date().toISOString(),
+                message
+            };
+            const historic = await this.mongoDeleteHistoricoRepository.save(DeleteHistoricoTask);
+            return historic;
+        }catch(error: any){
+            throw new Error(error);
+        }
+    }
 
+    public async getHistoricDeleteTask(idTask: number): Promise<DeleteHistoricoTask[]> {
+        try {
+            const findTasks = await this.mongoDeleteHistoricoRepository.find({ where: { "taskId": { $eq: idTask } } })
+            return findTasks;
+        } catch (error: any) {
+            throw new Error(error)
+        }
+    }
+
+    public async getHistoricDeleteTaskByUser(idUser: number): Promise<DeleteHistoricoTask[]> {
+        try {
+            const findTasks = await this.mongoDeleteHistoricoRepository.find({ where: { "user.id": { $eq: idUser } } });
+            return findTasks;
+        } catch (error: any) {
+            throw new Error(error)
+        }
+    }
+    
     public async getSharedTasksByUserId(userId: number): Promise<Task[]> {
         try {
             const tasks = await this.taskRepository
