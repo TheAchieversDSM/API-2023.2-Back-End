@@ -549,6 +549,11 @@ class TaskService {
             return historicTasks;
         });
         const historicTaskByOwner = (await Promise.all(historicTaskPromises)).flat();
+        historicTaskByOwner.sort((a: IHistorico, b: IHistorico) => {
+                const dataA = new Date(a.data).getTime();
+                const dataB = new Date(b.data).getTime();
+                return dataB - dataA;
+            });
         historicTaskByOwner.forEach(task => {
             const taskName = listIds.find(filterTask => filterTask.id === task.taskId)?.name;
             if (taskName) {
