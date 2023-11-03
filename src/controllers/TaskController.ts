@@ -40,9 +40,6 @@ class TaskController {
     try {
       const taskId = parseInt(req.params.id, 10);
       const usersIds: number[] = req.body.usersIds
-      if (usersIds.length < 1) {
-        return res.status(400).json({ error: "No user IDs provided." })
-      }
       await taskService.shareTask(taskId, usersIds)
       return res.status(200).json({ message: "Task sharing was successful." })
     } catch (error) {
