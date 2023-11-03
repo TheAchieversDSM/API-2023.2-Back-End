@@ -41,11 +41,13 @@
  <h3>:arrows_counterclockwise: Rotas do Sistema</h3>
 
 
-### 📄 Tarefas 
+#### 📄 Tarefas 
 
 |                                                                    Tipo | Rota `/task`                         | Ação                            |
 | ----------------------------------------------------------------------: | :----------------------------------- | :------------------------------ |
-| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]() | `/create`                              | Cadastra uma nova tarefa|
+| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/create`                               | Cadastra uma nova tarefa|
+| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/UpdateHistorico/:id/:idUser`          | Atualiza histórico de uma tarefa   |
+| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/shareTask/{id}`                       | Compartilha uma tarefa             |
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/all`                                  | Busca por todos as tarefas|
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getById/:id`                          | Busca uma tarefa por seu Id|
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getExpiredTasks/:id/:date`            | Busca por todas as tarefas expiradas|
@@ -54,11 +56,20 @@
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/repeatTask/:id`                       | Gerenciamento de tarefas recorrentes de um usuário|
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getTimeSpentMonthly/:id/:year`        | Busca tempo gasto em tarefas dos meses de um determinado ano |
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getTimeSpentByMonth/:id/:month`       | Busca tempo gasto em tarefas de um determinado mês |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getHistoricTask/:id`                 | Busca histórico de uma tarefa      |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getHistoricTask/:id`                 | Busca histórico de uma tarefa      |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getHistoricTask/:id`                 | Busca histórico de uma tarefa      |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getDeleteHistoricTaskByUser/:userId` | Busca histórico de exclusão por usuário |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getDeleteHistoricTaskByUser/:userId` | Busca histórico de exclusão por usuário |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getSharedTasksByUserId/:userId`      | Busca tarefas compartilhadas por usuário |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/getAllSharedTasks/`                  | Busca todas as tarefas compartilhadas |
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/renewCyclicTasks/:id`                | Renova tarefas cíclicas              |
 | [![](https://img.shields.io/badge/PUT-9370DB?style=for-the-badge)]() | `/update/:id`                           | Atualiza uma tarefa |
 | [![](https://img.shields.io/badge/PUT-9370DB?style=for-the-badge)]() | `/updateTime/:id`                       | Atualiza o tempo gasto de uma tarefa |
 | [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/delete/:id`                        | Deleta uma tarefa|
+| [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/stopTaskSharing/:id`               | Interrompe o compartilhamento de uma tarefa |
 
-###  Usuários
+####  Usuários
 
 |                                                                    Tipo | Rota `/user`                         | Ação                            |
 | ----------------------------------------------------------------------: | :----------------------------------- | :------------------------------ |
@@ -69,7 +80,7 @@
 | [![](https://img.shields.io/badge/PUT-9370DB?style=for-the-badge)]() | `/updateUser/:id`                       | Atualiza um usuário |
 | [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/deleteUser`                        | Deleta um usuário |
 
-### 📑 Subtarefas
+#### 📑 Subtarefas
 
 |                                                                    Tipo | Rota `/subtask`                      | Ação                            |
 | ----------------------------------------------------------------------: | :----------------------------------- | :------------------------------ |
