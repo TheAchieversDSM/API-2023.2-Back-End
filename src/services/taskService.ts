@@ -131,7 +131,7 @@ class TaskService {
                 .createQueryBuilder("task")
                 .leftJoinAndSelect("task.users", "users")
                 .addSelect(["users.email"])
-                .where("task.userId = :userId", { userId })
+                .where("task.userId = :userId OR users.id = :userId", { userId })
                 .andWhere("task.deadline = :date", { date })
                 .getMany();
     
@@ -204,9 +204,10 @@ class TaskService {
             const tasks = await this.taskRepository
                 .createQueryBuilder("task")
                 .leftJoinAndSelect("task.users", "users")
+                .where("task.userId = :userId OR users.id = :userId", { userId })
                 .addSelect(["users.email"])
-                .where("task.userId = :userId", { userId })
                 .getMany();
+            console.log(tasks)
             const nonCyclicTasks = tasks.filter((task) => { return task.customInterval === 0 })
             return nonCyclicTasks
         } catch (error) {
@@ -216,6 +217,10 @@ class TaskService {
 
     public async updateTask(id: number, task: Task) {
         try {
+            let taskToUpdate = await this.taskRepository.findOne({ where: { id } });
+
+            task.userId = taskToUpdate?.userId as number;
+
             const updatedTask = await this.taskRepository.update(id, task);
             if (!updatedTask.affected) {
                 throw new Error("Task not found");
