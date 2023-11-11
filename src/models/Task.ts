@@ -14,6 +14,7 @@ import { PriorityLevels } from "./PriorityLevels";
 import { User } from "./User";
 import { StatusLevels } from "./StatusLevels";
 import { Subtask } from "./Subtask";
+import { Files } from "./Files";
 
 
 @Entity({ name: "task" })
@@ -92,5 +93,8 @@ export class Task {
     @ManyToMany(() => Subtask, ( subtask) => subtask.task, { onDelete: "CASCADE" })
     @JoinColumn({name: "subtask_id"})
     subtask!: Subtask[];
+
+    @OneToMany(() => Files, (files) => files.task)
+    files!: Files[];
 
 }

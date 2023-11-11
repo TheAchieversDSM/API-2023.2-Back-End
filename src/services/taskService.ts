@@ -1,6 +1,6 @@
 import { MongoRepository, Repository } from "typeorm";
 import { DataBaseSource } from "../config/database";
-import { Subtask, Task, User } from "../models";
+import { Subtask, Task, User, Files } from "../models";
 import mongoose from "mongoose";
 import subtaskService from "./subtaskService";
 import { MongoDataSource } from "../config/mongoConfig";
@@ -13,6 +13,8 @@ import { IDeleteHistorico, IDynamicKeyData, IHistorico } from "../interfaces/his
 import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
 import { HistoricoTask } from "../models/MongoHisotirico";
 import { DeleteHistoricoTask } from "../models/MongoDeleteHistorico";
+import { StorageReference, getDownloadURL, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../config/firebase";
 
 class TaskService {
     private taskRepository: Repository<Task>;
@@ -20,6 +22,7 @@ class TaskService {
     private mongoFutureTaskRepository: Repository<MongoFutureTask>;
     private mongoHistoricoRepository: MongoRepository<HistoricoTask>;
     private mongoDeleteHistoricoRepository: MongoRepository<DeleteHistoricoTask>;
+    private fileUpload: Repository<Files>
 
     constructor() {
         this.taskRepository = DataBaseSource.getRepository(Task);
@@ -27,6 +30,7 @@ class TaskService {
         this.mongoFutureTaskRepository = MongoDataSource.getMongoRepository(MongoFutureTask);
         this.mongoHistoricoRepository = MongoDataSource.getMongoRepository(HistoricoTask);
         this.mongoDeleteHistoricoRepository = MongoDataSource.getMongoRepository(DeleteHistoricoTask);
+        this.fileUpload = DataBaseSource.getRepository(Files)
     }
 
     public async createTask(task: Task) {
@@ -623,6 +627,46 @@ class TaskService {
         }
     }
 
+    public async sendFile(idTask: number, files: Express.Multer.File[]): Promise<any[]> {
+        try {
+          const listUpload: any[] = [];
+          const task = await this.taskRepository.findOne({ where: { id: idTask } })
+          if (!task) {
+            throw new Error(`Task com ID ${idTask} não encontrada.`);
+          }
+          
+          await Promise.all(files.map(async (file) => {
+            const now = new Date();
+            const unixTime = Math.floor(now.getTime() / 1000);
+            const fileSplited = file.originalname.split(".")
+            const name = `${fileSplited[0]}${unixTime}.${fileSplited[1]}`
+            const fileRef: StorageReference = ref(storage, name);
+            const uploadTask = uploadBytesResumable(fileRef, file.buffer);
+            try {
+              await new Promise<void>((resolve, reject) => {
+                        uploadTask.on('state_changed',
+                        null,
+                    (error) => {
+                        listUpload.push({ name: name, size: file.size, status: 'error' });
+                        reject(error);
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                            await  this.fileUpload.insert({ fileName: name, fileSize: file.size, fileType: fileSplited[1], url: downloadURL, task: task })
+                            listUpload.push({ name: name, size: file.size, status: 'Ok', url: downloadURL });
+                            resolve();
+                        });
+                    });
+              });
+            } catch (error) {
+              console.error(`Error uploading file ${name}: ${error}`);
+            }
+          }));
+          return listUpload;
+        } catch (error: unknown) {
+          throw new Error(error as string);
+        }
+    }
 }
 
 export default new TaskService();
