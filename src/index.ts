@@ -3,7 +3,7 @@ import cors from 'cors';
 import router from './routes';
 import {DataBaseSource} from "./config/database";
 import {MongoDataSource} from './config/mongoConfig';
-
+import './config/firebase'
 DataBaseSource.initialize()
     .then(() => {
         console.log("Banco inicializado com sucesso!")
