@@ -412,6 +412,24 @@ class TaskController {
       res.status(500).json(error)
     }
   }
+
+  public async FileUpload(req: Request, res: Response) {
+    const idTask: number = parseInt(req.params.idTask, 10);
+    if (isNaN(idTask)) {
+      return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+    }
+    try {
+      if(!req.files){
+        throw new Error('Nenhum arquivo enviado.');
+      }
+      const files = Object.values(req.files) as unknown as Express.Multer.File[]
+      const uploadFiles = await taskService.sendFile(idTask, files.flat())
+      res.json(uploadFiles);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+  }
 }
 
 export default new TaskController();
