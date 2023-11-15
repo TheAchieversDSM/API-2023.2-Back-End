@@ -1,16 +1,16 @@
 import { Repository } from "typeorm";
 import { DataBaseSource } from "../config/database";
 import { Files, Task } from "../models";
-import { StorageReference, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { StorageReference, deleteObject, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "../config/firebase";
 
 class FileService {
     private taskRepository: Repository<Task>;
-    private fileUpload: Repository<Files>
+    private fileRepository: Repository<Files>
 
     constructor() {
         this.taskRepository = DataBaseSource.getRepository(Task);
-        this.fileUpload = DataBaseSource.getRepository(Files)
+        this.fileRepository = DataBaseSource.getRepository(Files)
 
     }
     public async sendFile(idTask: number, files: Express.Multer.File[]): Promise<any[]> {
@@ -38,7 +38,7 @@ class FileService {
                     },
                     () => {
                         getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                            await  this.fileUpload.insert({
+                            await  this.fileRepository.insert({
                                 fileName: name, 
                                 fileSize: file.size, 
                                 fileType: fileSplited[1], 
@@ -59,7 +59,25 @@ class FileService {
         }
     }
     public async deleteFile(idTask: number, idFile: number) {
-        
+        try {
+            const fileToDelete = await this.fileRepository.findOne({ 
+                where: { 
+                    id: idFile, 
+                    task: { 
+                        id: idTask 
+                    }
+                }
+            });
+            await this.fileRepository
+                .createQueryBuilder("file")
+                .where("id = :idFile AND taskId = :idTask", { idFile, idTask })
+                .delete()
+                .execute();
+            const desertRef = ref(storage, `${fileToDelete?.fileName}`);
+            deleteObject(desertRef)
+        } catch (error) {
+            console.error(`${error}`);
+        }
     }
 }
 

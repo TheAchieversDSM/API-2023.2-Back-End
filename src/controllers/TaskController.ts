@@ -426,8 +426,19 @@ class TaskController {
       res.json(uploadFiles);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Erro interno do servidor.' });
+      res.status(500).json({ error: 'Erro interno do servidor.'});
     }
+  }
+
+  public async DeleteFile(req: Request, res: Response){
+      const idTask: number = parseInt(req.params.idTask, 10);
+      const idFile: number = parseInt(req.params.idFile, 10);
+      try {
+        await fileService.deleteFile(idTask, idFile)
+        res.status(200).json({ data: "Ok" })
+      } catch (error) {
+        res.status(500).json({ error: 'Erro interno do servidor.'});
+      }
   }
 }
 

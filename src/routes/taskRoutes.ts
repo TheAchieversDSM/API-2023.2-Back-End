@@ -73,4 +73,8 @@ taskRouter.post("/fileUpload/:idTask", multer().fields([{ name: "file", maxCount
     // #swagger.tags = ['Task']
 )
 
+taskRouter.delete("/fileDelete/:idTask/:idFile", TaskController.DeleteFile,
+    // #swagger.tags = ['Task']
+)
+
 export default taskRouter;

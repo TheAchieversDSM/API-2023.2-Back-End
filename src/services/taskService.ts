@@ -199,6 +199,7 @@ class TaskService {
             const tasks = await this.taskRepository
                 .createQueryBuilder("task")
                 .leftJoinAndSelect("task.users", "users")
+                .leftJoinAndSelect("task.files", "files")
                 .where("task.userId = :userId OR users.id = :userId", { userId })
                 .addSelect(["users.email"])
                 .getMany();
@@ -459,6 +460,7 @@ class TaskService {
         try {
             const tasks = await this.taskRepository
                 .createQueryBuilder('task')
+                .leftJoinAndSelect('task.files', 'file')
                 .where('task.userId = :userId', { userId })
                 .getMany();
 
