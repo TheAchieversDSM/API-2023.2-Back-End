@@ -1,6 +1,6 @@
 import {Entity, ObjectIdColumn, ObjectId, Column, Index} from "typeorm";
 
-@Entity("historico_task")
+@Entity("historico_delete_task")
 @Index(["id", "user"])
 export class DeleteHistoricoTask {
   @ObjectIdColumn()
