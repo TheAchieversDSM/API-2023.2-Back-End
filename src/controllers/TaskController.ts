@@ -67,7 +67,7 @@ class TaskController {
         return res.status(404).json({ error: "No tasks found for this user" });
       }
       res.status(200).json({ message: "Tasks found for user", data: tasks });
-      res.status(200).json({ message: "Cyclic tasks found for user", data: tasks });
+      //res.status(200).json({ message: "Cyclic tasks found for user", data: tasks });
     } catch (error: any) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -310,6 +310,9 @@ class TaskController {
             return res.status(400).json({ message: "IDs inválidos" });
         }
 
+        if(deleteMessage){
+          await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
+        }
         const task = await TaskService.deleteTask(taskId, userIdNumber);
 
         if (task instanceof Error) {
@@ -321,9 +324,6 @@ class TaskController {
                 res.status(500).json({ error: "Internal Server Error" });
             }
         } else {
-            if(deleteMessage){
-              await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
-            }
             res.status(200).json({ message: "Task deleted successfully", data: task });
         }
     } catch (error: any) {

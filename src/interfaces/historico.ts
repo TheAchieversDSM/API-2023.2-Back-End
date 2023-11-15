@@ -19,6 +19,7 @@ export interface IHistorico {
 export interface IDeleteHistorico {
   id?: ObjectId;
   taskId: number;
+  taskName: string;
   date: string;
   user: {
     id: number;

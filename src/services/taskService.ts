@@ -579,15 +579,20 @@ class TaskService {
         return grupoNames;
     }
     
-    public async HistoricDeleteTask(idTask: number, userId: number, message: string) {
+    public async HistoricDeleteTask(id: number, userId: number, message: string) {
         try{
+            let task = await this.taskRepository.findOne({ where: { id } }) as Task
+            console.log("-----------------------")
+            console.log(task)
             let user = await DataBaseSource.getRepository(User).findOne({ where: { id: userId } });
             let DeleteHistoricoTask: IDeleteHistorico = {
-                taskId: idTask,
+                taskId: id,
+                taskName: task.name,
                 user : {id: user?.id as number, name: user?.name as string},
                 date: new Date().toISOString(),
                 message
             };
+            console.log(DeleteHistoricoTask)
             const historic = await this.mongoDeleteHistoricoRepository.save(DeleteHistoricoTask);
             return historic;
         }catch(error: any){
@@ -607,6 +612,7 @@ class TaskService {
     public async getHistoricDeleteTaskByUser(idUser: number): Promise<DeleteHistoricoTask[]> {
         try {
             const findTasks = await this.mongoDeleteHistoricoRepository.find({ where: { "user.id": { $eq: idUser } } });
+            console.log(findTasks)
             return findTasks;
         } catch (error: any) {
             throw new Error(error)

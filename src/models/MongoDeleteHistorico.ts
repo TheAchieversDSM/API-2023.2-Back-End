@@ -10,6 +10,9 @@ export class DeleteHistoricoTask {
   taskId!: number;
 
   @Column()
+  taskName!: string;
+
+  @Column()
   user!: {id: number; name: string};
 
   @Column()
