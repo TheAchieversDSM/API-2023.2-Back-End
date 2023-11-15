@@ -10,6 +10,12 @@ export class HistoricoTask {
   taskId!: number;
 
   @Column()
+  taskName!: string
+
+  @Column()
+  owner!: number
+
+  @Column()
   user!: {id: number; name: string};
 
   @Column()

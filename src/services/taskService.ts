@@ -1,6 +1,6 @@
 import { MongoRepository, Repository } from "typeorm";
 import { DataBaseSource } from "../config/database";
-import { Subtask, Task, User, Files } from "../models";
+import { Subtask, Task, User  } from "../models";
 import mongoose from "mongoose";
 import subtaskService from "./subtaskService";
 import { MongoDataSource } from "../config/mongoConfig";
@@ -8,29 +8,20 @@ import { MongoTask } from "../models/MongoTask";
 import { StatusLevels } from "../models/StatusLevels";
 import { MongoFutureTask } from "../models/MongoFutureTasks";
 import moment, { Moment } from "moment-timezone";
-import { create } from "domain";
-import { IDeleteHistorico, IDynamicKeyData, IHistorico } from "../interfaces/historico";
-import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
-import { HistoricoTask } from "../models/MongoHisotirico";
+import { IDeleteHistorico } from "../interfaces/historico";
 import { DeleteHistoricoTask } from "../models/MongoDeleteHistorico";
-import { StorageReference, getDownloadURL, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
-import { storage } from "../config/firebase";
 
 class TaskService {
     private taskRepository: Repository<Task>;
     private mongoTaskRepository: Repository<MongoTask>;
     private mongoFutureTaskRepository: Repository<MongoFutureTask>;
-    private mongoHistoricoRepository: MongoRepository<HistoricoTask>;
     private mongoDeleteHistoricoRepository: MongoRepository<DeleteHistoricoTask>;
-    private fileUpload: Repository<Files>
 
     constructor() {
         this.taskRepository = DataBaseSource.getRepository(Task);
         this.mongoTaskRepository = MongoDataSource.getMongoRepository(MongoTask);
         this.mongoFutureTaskRepository = MongoDataSource.getMongoRepository(MongoFutureTask);
-        this.mongoHistoricoRepository = MongoDataSource.getMongoRepository(HistoricoTask);
         this.mongoDeleteHistoricoRepository = MongoDataSource.getMongoRepository(DeleteHistoricoTask);
-        this.fileUpload = DataBaseSource.getRepository(Files)
     }
 
     public async createTask(task: Task) {
@@ -478,107 +469,6 @@ class TaskService {
     }
 
     
-    public async HistoricEditTask(idTask: number, taskUpdate: TaskUpdateDto, user: { name: string, id: number }) {
-        try {
-            let historicoEdit: IHistorico = {
-                taskId: idTask,
-                user,
-                data: new Date().toISOString(),
-                campo: {}
-            };
-            const fields = ["name", "description", "priority", "status", "done", "customInterval", "lastExecution", "timeSpent", "deadline"];
-            const task = await this.taskRepository.findOne({ where: { id: idTask } });
-            if (task) {
-                for (const field of fields) {
-                    if ((taskUpdate as any)[field] !== undefined && (task as any)[field] !== (taskUpdate as any)[field]) {
-                        historicoEdit.campo[field] = {
-                            old: (task as any)[field],
-                            new: (taskUpdate as any)[field]
-                        };
-                    }
-                }
-                const save = await this.mongoHistoricoRepository.save(historicoEdit);
-                return save;
-            }
-            return historicoEdit
-        } catch (error: any) {
-            throw new Error(error);
-        }
-    }
-    
-    public async getHistoricEditTask(idTask: number): Promise<IDynamicKeyData> {
-        try {
-            const findTask = await this.mongoHistoricoRepository.find({ where: { "taskId": { $eq: idTask } } })
-            const grupoDatas: IDynamicKeyData = {};
-            findTask.sort((a: IHistorico, b: IHistorico) => {
-                const dataA = new Date(a.data).getTime();
-                const dataB = new Date(b.data).getTime();
-                return dataB - dataA;
-            });
-            findTask.forEach((task) => {
-                const data = task.data.slice(0, 10);
-                if (!grupoDatas[data]) {
-                    grupoDatas[data] = [];
-                }
-                grupoDatas[data].push(task);
-            });
-            return grupoDatas;
-        } catch (error: any) {
-            throw new Error(error)
-        }
-    }
-
-    public async getHistoricTaskByUser(idUser: number): Promise<IDynamicKeyData> {
-        try {
-            const tasks = await this.taskRepository.findBy({ userId: idUser });
-            const search = await this.mongoHistoricoRepository.find({ where: { "user.id": { $eq: idUser } } });
-            const taskIdsSet = new Set(tasks.map(task => task.id));
-            const filteredSearch = search.filter(mongoTask => !taskIdsSet.has(mongoTask.taskId));
-            filteredSearch.sort((a: IHistorico, b: IHistorico) => {
-                const dataA = new Date(a.data).getTime();
-                const dataB = new Date(b.data).getTime();
-                return dataB - dataA;
-            });
-            const grupoDatas: IDynamicKeyData = {};
-            filteredSearch.forEach(task => {
-                const data = task.data.slice(0, 10);
-                if (!grupoDatas[data]) {
-                    grupoDatas[data] = [];
-                }
-                grupoDatas[data].push(task);
-            });
-            return grupoDatas;
-        } catch (error: any) {
-            throw new Error(error)
-        }
-    }
-
-    public async getHistoricTaskByOwner(idUser: number) {
-        const tasks = await this.taskRepository.findBy({ userId: idUser });
-        const grupoNames: IDynamicKeyData = {};
-        const listIds = tasks.map(task => ({ id: task.id, name: task.name }));
-        const historicTaskPromises = listIds.map(async (task) => {
-            const historicTasks = await this.mongoHistoricoRepository.find({ where: { taskId: task.id } });
-            return historicTasks;
-        });
-        const historicTaskByOwner = (await Promise.all(historicTaskPromises)).flat();
-        historicTaskByOwner.sort((a: IHistorico, b: IHistorico) => {
-            const dataA = new Date(a.data).getTime();
-            const dataB = new Date(b.data).getTime();
-            return dataB - dataA;
-        });
-        historicTaskByOwner.forEach(task => {
-            const taskName = listIds.find(filterTask => filterTask.id === task.taskId)?.name;
-            if (taskName) {
-                if (!grupoNames[taskName]) {
-                    grupoNames[taskName] = [];
-                }
-                grupoNames[taskName].push(task);
-            }
-        });
-        return grupoNames;
-    }
-    
     public async HistoricDeleteTask(idTask: number, userId: number, message: string) {
         try{
             let user = await DataBaseSource.getRepository(User).findOne({ where: { id: userId } });
@@ -620,51 +510,9 @@ class TaskService {
                 .innerJoinAndSelect('task.users', 'user')
                 .where('user.id = :userId', { userId })
                 .getMany();
-
             return tasks;
         } catch (error: unknown) {
             throw new Error(error as string);
-        }
-    }
-
-    public async sendFile(idTask: number, files: Express.Multer.File[]): Promise<any[]> {
-        try {
-          const listUpload: any[] = [];
-          const task = await this.taskRepository.findOne({ where: { id: idTask } })
-          if (!task) {
-            throw new Error(`Task com ID ${idTask} não encontrada.`);
-          }
-          
-          await Promise.all(files.map(async (file) => {
-            const now = new Date();
-            const unixTime = Math.floor(now.getTime() / 1000);
-            const fileSplited = file.originalname.split(".")
-            const name = `${fileSplited[0]}${unixTime}.${fileSplited[1]}`
-            const fileRef: StorageReference = ref(storage, name);
-            const uploadTask = uploadBytesResumable(fileRef, file.buffer);
-            try {
-              await new Promise<void>((resolve, reject) => {
-                        uploadTask.on('state_changed',
-                        null,
-                    (error) => {
-                        listUpload.push({ name: name, size: file.size, status: 'error' });
-                        reject(error);
-                    },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                            await  this.fileUpload.insert({ fileName: name, fileSize: file.size, fileType: fileSplited[1], url: downloadURL, task: task })
-                            listUpload.push({ name: name, size: file.size, status: 'Ok', url: downloadURL });
-                            resolve();
-                        });
-                    });
-              });
-            } catch (error) {
-              console.error(`Error uploading file ${name}: ${error}`);
-            }
-          }));
-          return listUpload;
-        } catch (error: unknown) {
-          throw new Error(error as string);
         }
     }
 }

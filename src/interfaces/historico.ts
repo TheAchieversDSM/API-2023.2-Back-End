@@ -4,6 +4,8 @@ export interface IHistorico {
   id?: ObjectId;
   taskId: number;
   data: string;
+  taskName?: string;
+  owner?: number;
   user: {
     id: number;
     name: string;
@@ -24,7 +26,7 @@ export interface IDeleteHistorico {
     id: number;
     name: string;
   };
-  message: string; 
+  message: string;
 }
 
 export interface IDynamicKeyData {

@@ -6,10 +6,9 @@ import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
 import { taskRepository } from "../repositories/TaskRepository";
 import { tasktimeUpdateDto } from "../dtos/tasks/tasktimeUpdateDto";
 import taskService from "../services/taskService";
-import { parse } from "path";
-import { UserDto } from "../dtos/users/userUpdateDto";
+import historicTask from "../services/historicService"
 import { IDynamicKeyData, IHistorico } from "../interfaces/historico";
-import { DataBaseSource } from "../config/database";
+import fileService from "../services/fileService";
 
 class TaskController {
   public async createTask(req: Request, res: Response) {
@@ -338,7 +337,7 @@ class TaskController {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const updateTask: IDynamicKeyData = await taskService.getHistoricEditTask(id)
+      const updateTask: IDynamicKeyData = await historicTask.getHistoricEditTask(id)
       res.status(200).json(updateTask)
     } catch (error: any) {
       res.status(500).json(error)
@@ -351,7 +350,7 @@ class TaskController {
       if (isNaN(idUser)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const searchedTasks: IDynamicKeyData = await taskService.getHistoricTaskByUser(idUser)
+      const searchedTasks: IDynamicKeyData = await historicTask.getHistoricTaskByUser(idUser)
       res.status(200).json(searchedTasks)
     } catch (error: any) {
       res.status(500).json(error)
@@ -364,7 +363,7 @@ class TaskController {
       if (isNaN(idUser)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const searchOwner = await taskService.getHistoricTaskByOwner(idUser)
+      const searchOwner = await historicTask.getHistoricTaskByOwner(idUser)
       res.json(searchOwner)
     } catch (error) {
 
@@ -406,7 +405,7 @@ class TaskController {
         return res.status(400).json({ error: "Usuario não encontrado" })
       }
       let taskUpdate: TaskUpdateDto = req.body;
-      const updateTask: IHistorico = await taskService.HistoricEditTask(idTask, taskUpdate, { id: idUser, name: user.name })
+      const updateTask: IHistorico = await historicTask.HistoricEditTask(idTask, taskUpdate, { id: idUser, name: user.name })
       res.status(200).json(updateTask)
     } catch (error: any) {
       res.status(500).json(error)
@@ -423,7 +422,7 @@ class TaskController {
         throw new Error('Nenhum arquivo enviado.');
       }
       const files = Object.values(req.files) as unknown as Express.Multer.File[]
-      const uploadFiles = await taskService.sendFile(idTask, files.flat())
+      const uploadFiles = await fileService.sendFile(idTask, files.flat())
       res.json(uploadFiles);
     } catch (error) {
       console.error(error);
