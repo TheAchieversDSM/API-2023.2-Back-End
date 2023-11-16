@@ -20,6 +20,7 @@ class HistoricService {
 
     public async HistoricEditTask(idTask: number, taskUpdate: TaskUpdateDto, user: { name: string, id: number }) {
         try {
+            
             const task = await this.taskRepository.findOne({ where: { id: idTask } });
             let historicoEdit: IHistorico = {
                 taskName: task?.name,
@@ -29,6 +30,13 @@ class HistoricService {
                 data: new Date().toISOString(),
                 campo: {}
             };
+            if(!taskUpdate){
+                return historicoEdit
+            }
+            if(taskUpdate.name){
+                historicoEdit.taskName = taskUpdate.name
+            }
+
             console.log(historicoEdit)
             if (task) {
                 for (const field of this.arrayFields) {
