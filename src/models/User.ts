@@ -1,42 +1,35 @@
+import {Task} from "./Task";
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    OneToMany,
-    BeforeInsert,
-    BeforeUpdate,
-    ManyToMany,
-    JoinTable,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
 } from "typeorm";
-import { Task } from "./Task";
-import * as bcrypt from "bcrypt"
 
-
-@Entity({ name: "user" })
+@Entity({name: "user"})
 export class User {
+  @PrimaryGeneratedColumn({
+    type: "int",
+  })
+  id!: number;
 
-    @PrimaryGeneratedColumn({
-        type: "int",
-    })
-    id!: number;
+  @Column({
+    type: "varchar",
+  })
+  name!: string;
 
-    @Column({
-        type: "varchar"
-    })
-    name!: string;
+  @Column({
+    type: "varchar",
+  })
+  email!: string;
 
-    @Column({
-        type: "varchar"
-    })
-    email!: string;
+  @Column({
+    type: "varchar",
+  })
+  password!: string;
 
-    @Column({
-        type: "varchar"
-    })
-    password!: string;
-
-    @ManyToMany(() => Task, task => task.users)
-    @JoinTable({name: "user_task"})
-    tasks!: Task[]
-
+  @ManyToMany(() => Task, (task) => task.users)
+  @JoinTable({name: "user_task"})
+  tasks!: Task[];
 }

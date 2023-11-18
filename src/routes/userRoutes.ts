@@ -10,7 +10,8 @@ userRouter.post("/login", UserController.userLogin,
 userRouter.post("/create", UserController.createUser,
     // #swagger.tags = ['Users']
 );
-//userRouter.use(auth)
+
+userRouter.use(auth)
 userRouter.get("/getAll", UserController.getAllUsers, 
     // #swagger.tags = ['Users']
 );

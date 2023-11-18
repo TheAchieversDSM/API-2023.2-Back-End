@@ -10,10 +10,10 @@ export class HistoricoTask {
   taskId!: number;
 
   @Column()
-  taskName!: string
+  taskName!: string;
 
   @Column()
-  owner!: number
+  owner!: number;
 
   @Column()
   user!: {id: number; name: string};
