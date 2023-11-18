@@ -36,8 +36,6 @@ class HistoricService {
             if(taskUpdate.name){
                 historicoEdit.taskName = taskUpdate.name
             }
-
-            console.log(historicoEdit)
             if (task) {
                 for (const field of this.arrayFields) {
                     if ((taskUpdate as any)[field] !== undefined && (task as any)[field] !== (taskUpdate as any)[field]) {

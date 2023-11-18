@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { TaskController } from "../controllers";
-import multer from "multer"
+
 const taskRouter = Router();
 
 taskRouter.post("/create", TaskController.createTask,
@@ -69,7 +69,7 @@ taskRouter.get("/getHistoricDeleteTask/:id", TaskController.getHistoricDeleteTas
 taskRouter.get("/getSharedTasksByUserId/:userId", TaskController.getSharedTasksByUserId,
     // #swagger.tags = ['Task']
 )
-taskRouter.post("/fileUpload/:idTask", multer().fields([{ name: "file", maxCount: 10 }]), TaskController.FileUpload,
+taskRouter.post("/fileUpload/:idTask", TaskController.FileUpload,
     // #swagger.tags = ['Task']
 )
 

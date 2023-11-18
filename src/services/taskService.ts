@@ -203,7 +203,6 @@ class TaskService {
                 .where("task.userId = :userId OR users.id = :userId", { userId })
                 .addSelect(["users.email"])
                 .getMany();
-            console.log(tasks)
             const nonCyclicTasks = tasks.filter((task) => { return task.customInterval === 0 })
             return nonCyclicTasks
         } catch (error) {
@@ -474,8 +473,6 @@ class TaskService {
     public async HistoricDeleteTask(id: number, userId: number, message: string) {
         try{
             let task = await this.taskRepository.findOne({ where: { id } }) as Task
-            console.log("-----------------------")
-            console.log(task)
             let user = await DataBaseSource.getRepository(User).findOne({ where: { id: userId } });
             let DeleteHistoricoTask: IDeleteHistorico = {
                 taskId: id,
@@ -484,7 +481,6 @@ class TaskService {
                 date: new Date().toISOString(),
                 message
             };
-            console.log(DeleteHistoricoTask)
             const historic = await this.mongoDeleteHistoricoRepository.save(DeleteHistoricoTask);
             return historic;
         }catch(error: any){
@@ -504,7 +500,6 @@ class TaskService {
     public async getHistoricDeleteTaskByUser(idUser: number): Promise<DeleteHistoricoTask[]> {
         try {
             const findTasks = await this.mongoDeleteHistoricoRepository.find({ where: { "user.id": { $eq: idUser } } });
-            console.log(findTasks)
             return findTasks;
         } catch (error: any) {
             throw new Error(error)

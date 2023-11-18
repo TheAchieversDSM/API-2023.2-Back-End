@@ -1,12 +1,12 @@
-import { Request, Response } from "express";
 import { UserRepository } from "../repositories/UserRepository";
 import { UserDto } from "../dtos/users/userUpdateDto";
 import userService from "../services/userService";
-import { User } from "../models";
-import "../config/dotenv"
-import * as bcrypt from "bcrypt"
-import * as jwt from "jsonwebtoken"
+import { Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
+import * as jwt  from "jsonwebtoken"
+import { User } from "../models";
+import * as bcrypt from "bcrypt"
+import "../config/dotenv"
 
 class UserController {
     public async createUser(req: Request, res: Response) {

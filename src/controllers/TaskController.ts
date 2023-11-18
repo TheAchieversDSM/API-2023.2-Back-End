@@ -1,14 +1,15 @@
-import { Request, Response } from "express";
-import TaskService from "../services/taskService";
-import { Task } from "../models";
-import userService from "../services/userService";
-import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
-import { taskRepository } from "../repositories/TaskRepository";
-import { tasktimeUpdateDto } from "../dtos/tasks/tasktimeUpdateDto";
-import taskService from "../services/taskService";
-import historicTask from "../services/historicService"
 import { IDynamicKeyData, IHistorico } from "../interfaces/historico";
+import { tasktimeUpdateDto } from "../dtos/tasks/tasktimeUpdateDto";
+import { taskRepository } from "../repositories/TaskRepository";
+import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
+import historicTask from "../services/historicService"
+import TaskService from "../services/taskService";
+import userService from "../services/userService";
+import taskService from "../services/taskService";
 import fileService from "../services/fileService";
+import { Request, Response } from "express";
+import { IFile } from "../interfaces/files";
+import { Task } from "../models";
 
 class TaskController {
   public async createTask(req: Request, res: Response) {
@@ -17,7 +18,6 @@ class TaskController {
       const createdTask = await TaskService.createTask(taskData);
 
       if (createdTask && taskData.customInterval > 0) {
-        console.log("Criando tarefas futuras");
         await TaskService.createFutureTasks(createdTask as Task);
       }
       res.status(200).json({ message: "Task created successfully", data: createdTask });
@@ -208,17 +208,8 @@ class TaskController {
         }
 
       } else {
-        console.log(taskUpdate)
         let taskid = parseInt(id, 10);
         let task = taskService.updateTask(taskid, taskUpdate as Task)
-
-        // const sharedUserIds = task.sharedUsersIds || [];
-        // await taskRepository.save(task);
-
-        // for (const userId of sharedUserIds) {
-        //     await DataBaseSource.getRepository("user_task").insert({ "userId": userId, "taskId": task.id });
-        // }
-
         taskUpdate.id = taskid
         if (taskUpdate.customInterval !== 0) {
           await TaskService.updateFutureTasks(taskUpdate as Task);
@@ -414,14 +405,15 @@ class TaskController {
 
   public async FileUpload(req: Request, res: Response) {
     const idTask: number = parseInt(req.params.idTask, 10);
+    const data = req.body;
+    if (!data) {
+      return res.status(400).json({ error: 'Arquivos inválidos' });
+    }
     if (isNaN(idTask)) {
       return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
     }
     try {
-      if(!req.files){
-        throw new Error('Nenhum arquivo enviado.');
-      }
-      const files = Object.values(req.files) as unknown as Express.Multer.File[]
+      const files = Object.values(data) as unknown as IFile[]
       const uploadFiles = await fileService.sendFile(idTask, files.flat())
       res.json(uploadFiles);
     } catch (error) {
