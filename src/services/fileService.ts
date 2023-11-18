@@ -1,8 +1,9 @@
 import { Repository } from "typeorm";
 import { DataBaseSource } from "../config/database";
 import { Files, Task } from "../models";
-import { StorageReference, deleteObject, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { storage } from "../config/firebase";
+import { IFile } from "../interfaces/files";
 
 class FileService {
     private taskRepository: Repository<Task>;
@@ -13,49 +14,31 @@ class FileService {
         this.fileRepository = DataBaseSource.getRepository(Files)
 
     }
-    public async sendFile(idTask: number, files: Express.Multer.File[]): Promise<any[]> {
+    public async sendFile(idTask: number, files: IFile[]): Promise<any[]> {
         try {
-          const listUpload: any[] = [];
-          const task = await this.taskRepository.findOne({ where: { id: idTask } })
-          if (!task) {
-            throw new Error(`Task com ID ${idTask} não encontrada.`);
-          }
-          
-          await Promise.all(files.map(async (file) => {
-            const now = new Date();
-            const unixTime = Math.floor(now.getTime() / 1000);
-            const fileSplited: string[] = file.originalname.split(".")
-            const name = `${fileSplited[0]}${unixTime}.${fileSplited[1]}`
-            const fileRef: StorageReference = ref(storage, name);
-            const uploadTask = uploadBytesResumable(fileRef, file.buffer);
-            try {
-              await new Promise<void>((resolve, reject) => {
-                        uploadTask.on('state_changed',
-                        null,
-                    (error) => {
-                        listUpload.push({ name: name, size: file.size, status: 'error' });
-                        reject(error);
-                    },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                            await  this.fileRepository.insert({
-                                fileName: name, 
-                                fileSize: file.size, 
-                                fileType: fileSplited[1], 
-                                url: downloadURL, task: task
-                            })
-                            listUpload.push({ name: name, size: file.size, status: 'Ok', url: downloadURL });
-                            resolve();
-                        });
-                    });
-              });
-            } catch (error) {
-              console.error(`Error uploading file ${name}: ${error}`);
+            const listUpload: any[] = [];
+            const task = await this.taskRepository.findOne({ where: { id: idTask } })
+            if (!task) {
+                throw new Error(`Task com ID ${idTask} não encontrada.`);
             }
-          }));
-          return listUpload;
+            files.forEach(async(file: IFile, index: number) => {
+                const insert = this.fileRepository.create({ 
+                    task: { id: idTask }, 
+                    fileName: file.fileName,
+                    fileSize: file.fileSize,
+                    fileType: file.fileType,
+                    url: file.url 
+                })
+                await this.fileRepository.save(insert)
+                listUpload.push({
+                    file: index,
+                    name: insert.fileName,
+                    status: "Ok"
+                })
+            })
+            return listUpload;
         } catch (error: unknown) {
-          throw new Error(error as string);
+            throw new Error(error as string);
         }
     }
     public async deleteFile(idTask: number, idFile: number) {

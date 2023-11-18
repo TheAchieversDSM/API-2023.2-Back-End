@@ -18,7 +18,7 @@ export class Files {
     nullable: true,
 })
   fileName!: string
-
+  
   @Column({
     type: "varchar",
     nullable: true,
