@@ -110,7 +110,7 @@ class TaskService {
 
     public async getTaskById(id: number) {
         try {
-            const task = await this.taskRepository.findOne({ where: { id } });
+            const task = await this.taskRepository.findOne({ where: { id }, relations: { files: true,  } });
             if (!task) {
                 return null;
             }
