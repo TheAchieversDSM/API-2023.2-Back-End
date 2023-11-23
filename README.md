@@ -47,9 +47,10 @@
 | ----------------------------------------------------------------------: | :----------------------------------- | :------------------------------ |
 | [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/create`                               | Cadastra uma nova tarefa|
 | [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/UpdateHistorico/:id/:idUser`          | Atualiza histórico de uma tarefa   |
-| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/shareTask/{id}`                       | Compartilha uma tarefa             |
+| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/shareTask/:id`                        | Compartilha uma tarefa             |
+| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()| `/fileUpload/:id`                       | Upload de arquivos em num tarefa   |
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/all`                                  | Busca por todos as tarefas|
-| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getById/:id`                          | Busca uma tarefa por seu Id|
+| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getById/:id`                          | Busca uma tarefa pelo id |
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getExpiredTasks/:id/:date`            | Busca por todas as tarefas expiradas|
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getByUserId/:userId`                  | Busca por todos as tarefas de um usuário|
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]() | `/getNonCyclicTaskByUserId/:id`         | Busca por todos as tarefas recorrentes de um usuário|
@@ -66,7 +67,8 @@
 | [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()  | `/renewCyclicTasks/:id`                | Renova tarefas cíclicas              |
 | [![](https://img.shields.io/badge/PUT-9370DB?style=for-the-badge)]() | `/update/:id`                           | Atualiza uma tarefa |
 | [![](https://img.shields.io/badge/PUT-9370DB?style=for-the-badge)]() | `/updateTime/:id`                       | Atualiza o tempo gasto de uma tarefa |
-| [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/delete/:id`                        | Deleta uma tarefa|
+| [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/delete/:id`                        | Deleta uma tarefa |
+| [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/fileDelete/:id/:idFile`            | Deleta um arquivo de uma tarefa |
 | [![](https://img.shields.io/badge/DELETE-CD853F?style=for-the-badge)]() | `/stopTaskSharing/:id`               | Interrompe o compartilhamento de uma tarefa |
 
 ####  Usuários
