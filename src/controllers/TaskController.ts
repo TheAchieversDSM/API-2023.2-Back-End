@@ -290,8 +290,7 @@ class TaskController {
 
   public async deleteTask(req: Request, res: Response) {
     const { id, userId } = req.params;
-    const deleteMessage = req.body.deleteMessage;
-
+    //const deleteMessage = req.body.deleteMessage;
     try {
         const taskId: number = parseInt(id, 10);
         const userIdNumber: number = parseInt(userId, 10);
@@ -300,11 +299,12 @@ class TaskController {
             return res.status(400).json({ message: "IDs inválidos" });
         }
 
-        if(deleteMessage){
+        /* if(deleteMessage){
+          console.log("deletada")
           await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
-        }
+        } */
         const task = await TaskService.deleteTask(taskId, userIdNumber);
-
+        console.log(task)
         if (task instanceof Error) {
             if (task.message === "Task not found") {
                 res.status(404).json({ error: "Task not found" });
@@ -319,6 +319,32 @@ class TaskController {
     } catch (error: any) {
         res.status(500).json({ error: "Internal Server Error", data: error });
     }
+}
+
+public async ReasonDeleteTask(req: Request, res: Response) {
+  const { id, userId } = req.params;
+  const deleteMessage = req.body.deleteMessage;
+  console.log(id, userId, deleteMessage)
+  console.log("oi", deleteMessage)
+  try {
+      const taskId: number = parseInt(id, 10);
+      const userIdNumber: number = parseInt(userId, 10);
+
+      if (isNaN(taskId) || isNaN(userIdNumber)) {
+          return res.status(400).json({ message: "IDs inválidos" });
+      }
+
+      if(deleteMessage){
+        console.log("deletada")
+        const a = await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
+        console.log(a)
+
+      }
+      const task = await TaskService.deleteTask(taskId, userIdNumber);
+      res.status(200).json({ message: "Task deleted successfully", data: task });
+  } catch (error: any) {
+      res.status(500).json({ error: "Internal Server Error", data: error });
+  }
 }
 
 

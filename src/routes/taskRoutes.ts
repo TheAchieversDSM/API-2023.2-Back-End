@@ -21,6 +21,10 @@ taskRouter.put("/update/:id", TaskController.updateTask,
 taskRouter.put("/updateTime/:id", TaskController.updatetaskTimeSpent,
     // #swagger.tags = ['Task']
 );
+taskRouter.post("/delete/:id/:userId", TaskController.ReasonDeleteTask,
+    // #swagger.tags = ['Task']
+);
+
 taskRouter.delete("/delete/:id/:userId", TaskController.deleteTask,
     // #swagger.tags = ['Task']
 );

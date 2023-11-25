@@ -272,7 +272,6 @@ class TaskService {
             if (!task) {
                 throw new Error("Task not found");
             }
-    
             if (task.userId !== userId) {
                 throw new Error("Permission denied. You do not have permission to delete this task.");
             }
