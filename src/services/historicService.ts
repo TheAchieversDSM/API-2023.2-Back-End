@@ -128,7 +128,30 @@ class HistoricService {
             throw new Error(error)
         }
     }
-}
 
+public async getHistoricSharedtasks(idUser: number): Promise<IDynamicKeyData> {
+    try {
+        const grupoDatas: IDynamicKeyData = {};
+        const search = await this.mongoHistoricoRepository.find({ 
+            where:{ "user.id": { $ne: idUser }}
+        });
+        search.sort((a: IHistorico, b: IHistorico) => {
+            const dataA = new Date(a.data).getTime();
+            const dataB = new Date(b.data).getTime();
+            return dataB - dataA;
+        });
+        search.forEach(task => {
+            const data = task.data.slice(0, 10);
+            if (!grupoDatas[data]) {
+                grupoDatas[data] = [];
+            }
+            grupoDatas[data].push(task);
+        });
+        
+        return grupoDatas;
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}}
 
 export default new HistoricService()
