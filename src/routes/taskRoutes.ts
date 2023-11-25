@@ -73,6 +73,9 @@ taskRouter.get("/getHistoricDeleteTask/:id", TaskController.getHistoricDeleteTas
 taskRouter.get("/getSharedTasksByUserId/:userId", TaskController.getSharedTasksByUserId,
     // #swagger.tags = ['Task']
 )
+taskRouter.get("/getHistoricSharedtasks/:idUser", TaskController.getHistoricSharedtasks,
+    // #swagger.tags = ['Task']     
+)
 taskRouter.post("/fileUpload/:idTask", TaskController.FileUpload,
     // #swagger.tags = ['Task']
 )

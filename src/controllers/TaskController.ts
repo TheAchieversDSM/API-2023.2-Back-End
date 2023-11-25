@@ -413,6 +413,19 @@ public async ReasonDeleteTask(req: Request, res: Response) {
     }
   }
 
+  public async getHistoricSharedtasks(req: Request, res: Response) {
+    const idUser: number = parseInt(req.params.idUser, 10)
+    try {
+      if (isNaN(idUser)) {
+        return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+      }
+      const search = await historicTask.getHistoricSharedtasks(idUser)
+      res.status(200).json(search)
+    } catch (error: any) {
+      res.status(500).json(error)
+    }
+  }
+
   public async UpdateHistorico(req: Request, res: Response) {
     const idTask: number = parseInt(req.params.idTask, 10);
     const idUser: number = parseInt(req.params.idUser, 10);
