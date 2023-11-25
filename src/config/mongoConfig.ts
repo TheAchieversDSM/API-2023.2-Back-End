@@ -7,7 +7,6 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const entidades = [MongoTask, MongoFutureTask, HistoricoTask, DeleteHistoricoTask];
-
 export const MongoDataSource = new DataSource({
             type: "mongodb",
             url: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?retryWrites=true&w=majority`,
