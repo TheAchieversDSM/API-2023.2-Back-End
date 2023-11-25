@@ -72,6 +72,8 @@ export class Task {
   @CreateDateColumn({name: "created_at"})
   createdAt!: Date;
 
+  userOwner: User | undefined;
+
   @Column({
     type: "int",
   })
