@@ -129,11 +129,11 @@ class HistoricService {
         }
     }
 
-public async getHistoricSharedtasks(idUser: number): Promise<IDynamicKeyData> {
+public async getHistoricSharedtasks(userid: number): Promise<IDynamicKeyData> {
     try {
         const grupoDatas: IDynamicKeyData = {};
         const search = await this.mongoHistoricoRepository.find({ 
-            where:{ "user.id": { $ne: idUser }}
+            where:{ "user.id": { $ne: userid }}
         });
         search.sort((a: IHistorico, b: IHistorico) => {
             const dataA = new Date(a.data).getTime();
