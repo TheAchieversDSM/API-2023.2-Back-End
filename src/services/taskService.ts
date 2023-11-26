@@ -147,6 +147,7 @@ class TaskService {
       let tasks: any = await this.taskRepository
         .createQueryBuilder("task")
         .leftJoinAndSelect("task.users", "users")
+        .leftJoinAndSelect("task.files", "file")
         .addSelect(["users.email"])
         .where("task.userId = :userId OR users.id = :userId", { userId })
         .andWhere("task.deadline = :date", { date })
@@ -185,7 +186,6 @@ class TaskService {
       const futureCycleTasks = await this.mongoFutureTaskRepository.find({
         where: { userId: userId, deadline: date },
       });
-
       const retorno = {
         recorrente: [...recorente, ...pastCycleTasks, ...futureCycleTasks],
         naoRecorrente: [...naoRecorente],

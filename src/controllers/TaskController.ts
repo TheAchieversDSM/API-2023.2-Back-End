@@ -113,7 +113,7 @@ class TaskController {
       task = await TaskService.getTaskById(taskId);
 
       if (task === null) {
-        res.status(400).json({ error: "Task not found" });
+        res.status(404  ).json({ error: "Task not found" });
       } else {
         res.status(200).json({ message: "Task found", data: task });
       }
@@ -133,14 +133,14 @@ class TaskController {
     if (isNaN(userId)) {
       return res.status(400).json({ message: "parameter 'id' is not a valid number" })
     }
-
     try {
       const tasks = await TaskService.getExpiredTasks(userId, date);
-
+      
       if (tasks.recorrente.length === 0 && tasks.naoRecorrente.length === 0) {
         return res.status(404).json({ error: "No tasks found for this user" });
       }
       tasks.recorrente = [... new Set(tasks.recorrente)]
+      console.log(tasks.recorrente)
       res.status(200).json({ message: "Expired tasks found for user", data: tasks });
 
     } catch (error: any) {
