@@ -437,9 +437,6 @@ class TaskService {
       const deletedTask = await this.mongoFutureTaskRepository.delete({
         taskId: taskId,
       });
-      if (!deletedTask.affected) {
-        throw new Error("Task not found");
-      }
       return deletedTask;
     } catch (error) {
       console.log(error);

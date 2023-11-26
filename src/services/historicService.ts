@@ -8,7 +8,7 @@ import { Task } from "../models";
 import { DataBaseSource } from "../config/database";
 
 class HistoricService {
-    private arrayFields: string[] = ["name", "description", "priority", "status", "done", "customInterval", "lastExecution", "timeSpent", "deadline"];
+    private arrayFields: string[] = ["name", "description", "priority", "status", "done", "customInterval", "lastExecution", "timeSpent", "deadline",];
     private taskRepository: Repository<Task>;
     private mongoHistoricoRepository: MongoRepository<HistoricoTask>;
     private mongoDeleteHistoricoRepository: MongoRepository<DeleteHistoricoTask>;
@@ -28,7 +28,7 @@ class HistoricService {
                 taskId: idTask,
                 user,
                 data: new Date().toISOString(),
-                campo: {}
+                campo: {},
             };
             if(!taskUpdate){
                 return historicoEdit
@@ -129,27 +129,33 @@ class HistoricService {
         }
     }
 
-    public async getHistoricSharedtasks(idUser: number): Promise<IDynamicKeyData> {
+    public async getHistoricSharedtasks(userId: number): Promise<IDynamicKeyData> {
         try {
-            const grupoDatas: IDynamicKeyData = {};
-            const search = await this.mongoHistoricoRepository.find({
-                where: { "user.id": idUser, "sharedUsersIds": { $in: [idUser] } }
-            });
-    
-            search.sort((a: IHistorico, b: IHistorico) => {
-                const dataA = new Date(a.data).getTime();
-                const dataB = new Date(b.data).getTime();
-                return dataB - dataA;
-            });
-            search.forEach(task => {
-                const data = task.data.slice(0, 10);
-                if (!grupoDatas[data]) {
-                    grupoDatas[data] = [];
-                }
-                grupoDatas[data].push(task);
-            });
-    
-            return grupoDatas;
+            const tasks = await this.taskRepository.createQueryBuilder("task")
+            .leftJoinAndSelect("task.users", "users")
+            .where("users.id = :userId", { userId })
+            .getMany()
+
+            let taskIds = tasks.map((task)=> task.id)
+
+            let sharedHistorics = await this.mongoHistoricoRepository.find({
+                where: { taskId: { $in: taskIds } }
+             });
+
+             const grupoDatas: IDynamicKeyData = {};
+             sharedHistorics.sort((a: IHistorico, b: IHistorico) => {
+                 const dataA = new Date(a.data).getTime();
+                 const dataB = new Date(b.data).getTime();
+                 return dataB - dataA;
+             });
+             sharedHistorics.forEach((task) => {
+                 const data = task.data.slice(0, 10);
+                 if (!grupoDatas[data]) {
+                     grupoDatas[data] = [];
+                 }
+                 grupoDatas[data].push(task);
+             });
+             return grupoDatas;
         } catch (error: any) {
             throw new Error(error);
         }
