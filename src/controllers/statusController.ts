@@ -1,7 +1,7 @@
-import {Request, Response} from "express";
-import * as http from "http";
 import taskService from "../services/taskService";
+import {Request, Response} from "express";
 import { Task } from "../models";
+import * as http from "http";
 
 class StatusController {
   public async getStatus(req: Request, res: Response) {

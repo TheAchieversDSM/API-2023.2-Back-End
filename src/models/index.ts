@@ -1,9 +1,10 @@
-import { Task } from "./Task";
-import { Subtask } from "./Subtask";
-import { User } from "./User";
-import { MongoTask } from "./MongoTask";
 import { MongoFutureTask } from "./MongoFutureTasks";
+import { MongoTask } from "./MongoTask";
 import { UserTask } from "./UserTask";
+import { Subtask } from "./Subtask";
+import { Files } from "./Files";
+import { Task } from "./Task";
+import { User } from "./User";
 
 export{
     Task,
@@ -11,5 +12,6 @@ export{
     User,
     MongoTask,
     MongoFutureTask,
-    UserTask
+    UserTask,
+    Files
 }

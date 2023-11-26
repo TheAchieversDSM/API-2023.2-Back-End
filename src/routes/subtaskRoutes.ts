@@ -1,5 +1,6 @@
-import { Router } from "express";
 import { SubtaskController } from "../controllers";
+import { Router } from "express";
+
 const subtaskRouter = Router();
 
 subtaskRouter.post("/create", SubtaskController.createSubtask,

@@ -44,7 +44,7 @@ jobs:
       - name: Atualizar o Git com a Develop
         if: github.ref == 'refs/heads/develop'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && git pull origin develop"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_AZURE }}@${{ secrets.HOST_AZURE }} "cd /home/azureuser/API-2023.2-Back-End && git pull origin develop && npm install"
 
       - name: Rodar o PM2
         if: github.ref == 'refs/heads/develop'

@@ -1,15 +1,15 @@
-import { Request, Response } from "express";
-import TaskService from "../services/taskService";
-import { Task } from "../models";
-import userService from "../services/userService";
-import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
-import { taskRepository } from "../repositories/TaskRepository";
-import { tasktimeUpdateDto } from "../dtos/tasks/tasktimeUpdateDto";
-import taskService from "../services/taskService";
-import { parse } from "path";
-import { UserDto } from "../dtos/users/userUpdateDto";
 import { IDynamicKeyData, IHistorico } from "../interfaces/historico";
-import { DataBaseSource } from "../config/database";
+import { tasktimeUpdateDto } from "../dtos/tasks/tasktimeUpdateDto";
+import { taskRepository } from "../repositories/TaskRepository";
+import { TaskUpdateDto } from "../dtos/tasks/taskUpdateDto";
+import historicTask from "../services/historicService"
+import TaskService from "../services/taskService";
+import userService from "../services/userService";
+import taskService from "../services/taskService";
+import fileService from "../services/fileService";
+import { Request, Response } from "express";
+import { IFile } from "../interfaces/files";
+import { Task } from "../models";
 
 class TaskController {
   public async createTask(req: Request, res: Response) {
@@ -18,7 +18,6 @@ class TaskController {
       const createdTask = await TaskService.createTask(taskData);
 
       if (createdTask && taskData.customInterval > 0) {
-        console.log("Criando tarefas futuras");
         await TaskService.createFutureTasks(createdTask as Task);
       }
       res.status(200).json({ message: "Task created successfully", data: createdTask });
@@ -67,7 +66,7 @@ class TaskController {
         return res.status(404).json({ error: "No tasks found for this user" });
       }
       res.status(200).json({ message: "Tasks found for user", data: tasks });
-      res.status(200).json({ message: "Cyclic tasks found for user", data: tasks });
+      //res.status(200).json({ message: "Cyclic tasks found for user", data: tasks });
     } catch (error: any) {
       res.status(500).json({ error: "Internal Server Error" });
     }
@@ -114,7 +113,7 @@ class TaskController {
       task = await TaskService.getTaskById(taskId);
 
       if (task === null) {
-        res.status(400).json({ error: "Task not found" });
+        res.status(404  ).json({ error: "Task not found" });
       } else {
         res.status(200).json({ message: "Task found", data: task });
       }
@@ -134,14 +133,14 @@ class TaskController {
     if (isNaN(userId)) {
       return res.status(400).json({ message: "parameter 'id' is not a valid number" })
     }
-
     try {
       const tasks = await TaskService.getExpiredTasks(userId, date);
-
+      
       if (tasks.recorrente.length === 0 && tasks.naoRecorrente.length === 0) {
         return res.status(404).json({ error: "No tasks found for this user" });
       }
       tasks.recorrente = [... new Set(tasks.recorrente)]
+      console.log(tasks.recorrente)
       res.status(200).json({ message: "Expired tasks found for user", data: tasks });
 
     } catch (error: any) {
@@ -209,17 +208,8 @@ class TaskController {
         }
 
       } else {
-        console.log(taskUpdate)
         let taskid = parseInt(id, 10);
         let task = taskService.updateTask(taskid, taskUpdate as Task)
-
-        // const sharedUserIds = task.sharedUsersIds || [];
-        // await taskRepository.save(task);
-
-        // for (const userId of sharedUserIds) {
-        //     await DataBaseSource.getRepository("user_task").insert({ "userId": userId, "taskId": task.id });
-        // }
-
         taskUpdate.id = taskid
         if (taskUpdate.customInterval !== 0) {
           await TaskService.updateFutureTasks(taskUpdate as Task);
@@ -300,8 +290,7 @@ class TaskController {
 
   public async deleteTask(req: Request, res: Response) {
     const { id, userId } = req.params;
-    const deleteMessage = req.body.deleteMessage;
-
+    //const deleteMessage = req.body.deleteMessage;
     try {
         const taskId: number = parseInt(id, 10);
         const userIdNumber: number = parseInt(userId, 10);
@@ -310,8 +299,12 @@ class TaskController {
             return res.status(400).json({ message: "IDs inválidos" });
         }
 
+        /* if(deleteMessage){
+          console.log("deletada")
+          await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
+        } */
         const task = await TaskService.deleteTask(taskId, userIdNumber);
-
+        console.log(task)
         if (task instanceof Error) {
             if (task.message === "Task not found") {
                 res.status(404).json({ error: "Task not found" });
@@ -321,14 +314,33 @@ class TaskController {
                 res.status(500).json({ error: "Internal Server Error" });
             }
         } else {
-            if(deleteMessage){
-              await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
-            }
             res.status(200).json({ message: "Task deleted successfully", data: task });
         }
     } catch (error: any) {
         res.status(500).json({ error: "Internal Server Error", data: error });
     }
+}
+
+public async ReasonDeleteTask(req: Request, res: Response) {
+  const { id, userId } = req.params;
+  const deleteMessage = req.body.deleteMessage;
+
+  try {
+      const taskId: number = parseInt(id, 10);
+      const userIdNumber: number = parseInt(userId, 10);
+
+      if (isNaN(taskId) || isNaN(userIdNumber)) {
+          return res.status(400).json({ message: "IDs inválidos" });
+      }
+
+      if(deleteMessage){
+        const a = await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
+      }
+      const task = await TaskService.deleteTask(taskId, userIdNumber);
+      res.status(200).json({ message: "Task deleted successfully", data: task });
+  } catch (error: any) {
+      res.status(500).json({ error: "Internal Server Error", data: error });
+  }
 }
 
 
@@ -338,7 +350,7 @@ class TaskController {
       if (isNaN(id)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const updateTask: IDynamicKeyData = await taskService.getHistoricEditTask(id)
+      const updateTask: IDynamicKeyData = await historicTask.getHistoricEditTask(id)
       res.status(200).json(updateTask)
     } catch (error: any) {
       res.status(500).json(error)
@@ -351,7 +363,7 @@ class TaskController {
       if (isNaN(idUser)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const searchedTasks: IDynamicKeyData = await taskService.getHistoricTaskByUser(idUser)
+      const searchedTasks: IDynamicKeyData = await historicTask.getHistoricTaskByUser(idUser)
       res.status(200).json(searchedTasks)
     } catch (error: any) {
       res.status(500).json(error)
@@ -364,7 +376,7 @@ class TaskController {
       if (isNaN(idUser)) {
         return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
       }
-      const searchOwner = await taskService.getHistoricTaskByOwner(idUser)
+      const searchOwner = await historicTask.getHistoricTaskByOwner(idUser)
       res.json(searchOwner)
     } catch (error) {
 
@@ -397,6 +409,19 @@ class TaskController {
     }
   }
 
+  public async getHistoricSharedtasks(req: Request, res: Response) {
+    const userId: number = parseInt(req.params.userId, 10)
+    try {
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+      }
+      const search = await historicTask.getHistoricSharedtasks(userId)
+      res.status(200).json(search)
+    } catch (error: any) {
+      res.status(500).json(error)
+    }
+  }
+
   public async UpdateHistorico(req: Request, res: Response) {
     const idTask: number = parseInt(req.params.idTask, 10);
     const idUser: number = parseInt(req.params.idUser, 10);
@@ -406,11 +431,41 @@ class TaskController {
         return res.status(400).json({ error: "Usuario não encontrado" })
       }
       let taskUpdate: TaskUpdateDto = req.body;
-      const updateTask: IHistorico = await taskService.HistoricEditTask(idTask, taskUpdate, { id: idUser, name: user.name })
+      const updateTask: IHistorico = await historicTask.HistoricEditTask(idTask, taskUpdate, { id: idUser, name: user.name })
       res.status(200).json(updateTask)
     } catch (error: any) {
       res.status(500).json(error)
     }
+  }
+
+  public async FileUpload(req: Request, res: Response) {
+    const idTask: number = parseInt(req.params.idTask, 10);
+    const data = req.body;
+    if (!data) {
+      return res.status(400).json({ error: 'Arquivos inválidos' });
+    }
+    if (isNaN(idTask)) {
+      return res.status(400).json({ error: "Algo deu errado ao buscar um parâmetro." })
+    }
+    try {
+      const files = Object.values(data) as unknown as IFile[]
+      const uploadFiles = await fileService.sendFile(idTask, files.flat())
+      res.json(uploadFiles);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erro interno do servidor.'});
+    }
+  }
+
+  public async DeleteFile(req: Request, res: Response){
+      const idTask: number = parseInt(req.params.idTask, 10);
+      const idFile: number = parseInt(req.params.idFile, 10);
+      try {
+        await fileService.deleteFile(idTask, idFile)
+        res.status(200).json({ data: "Ok" })
+      } catch (error) {
+        res.status(500).json({ error: 'Erro interno do servidor.'});
+      }
   }
 }
 

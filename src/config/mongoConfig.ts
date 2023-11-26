@@ -2,13 +2,15 @@ import { DataSource} from 'typeorm';
 import { MongoFutureTask, MongoTask } from '../models';
 import { HistoricoTask } from '../models/MongoHisotirico';
 import { DeleteHistoricoTask } from '../models/MongoDeleteHistorico';
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const entidades = [MongoTask, MongoFutureTask, HistoricoTask, DeleteHistoricoTask];
-
 export const MongoDataSource = new DataSource({
             type: "mongodb",
-            url: "mongodb+srv://arquiveirosdsm:mmmgna2023_@api20232.udt69pz.mongodb.net/?retryWrites=true&w=majority",
-            database: "API",
+            url: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_CLUSTER}/?retryWrites=true&w=majority`,
+            database: `${process.env.MONGO_DATABASE}`,
             synchronize: true,
             logging: false,
             entities: entidades,

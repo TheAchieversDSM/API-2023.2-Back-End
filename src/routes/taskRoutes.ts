@@ -21,6 +21,10 @@ taskRouter.put("/update/:id", TaskController.updateTask,
 taskRouter.put("/updateTime/:id", TaskController.updatetaskTimeSpent,
     // #swagger.tags = ['Task']
 );
+taskRouter.post("/delete/:id/:userId", TaskController.ReasonDeleteTask,
+    // #swagger.tags = ['Task']
+);
+
 taskRouter.delete("/delete/:id/:userId", TaskController.deleteTask,
     // #swagger.tags = ['Task']
 );
@@ -67,6 +71,16 @@ taskRouter.get("/getHistoricDeleteTask/:id", TaskController.getHistoricDeleteTas
     // #swagger.tags = ['Task']
 )
 taskRouter.get("/getSharedTasksByUserId/:userId", TaskController.getSharedTasksByUserId,
+    // #swagger.tags = ['Task']
+)
+taskRouter.get("/getHistoricSharedtasks/:userId", TaskController.getHistoricSharedtasks,
+    // #swagger.tags = ['Task']     
+)
+taskRouter.post("/fileUpload/:idTask", TaskController.FileUpload,
+    // #swagger.tags = ['Task']
+)
+
+taskRouter.delete("/fileDelete/:idTask/:idFile", TaskController.DeleteFile,
     // #swagger.tags = ['Task']
 )
 

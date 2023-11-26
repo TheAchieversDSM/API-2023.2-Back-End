@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
-import SubtaskService from "../services/subtaskService";
-import { Subtask } from "../models";
-import { SubtaskUpdateDto } from "../dtos/subtask/subtaskUpdateDto";
 import { subtaskRepository } from "../repositories/SubtaskRepository";
+import { SubtaskUpdateDto } from "../dtos/subtask/subtaskUpdateDto";
+import SubtaskService from "../services/subtaskService";
 import subtaskService from "../services/subtaskService";
+import { Request, Response } from "express";
+import { Subtask } from "../models";
 
 class SubtaskController {
     public async createSubtask(req: Request, res: Response) {
