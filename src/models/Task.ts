@@ -90,6 +90,6 @@ export class Task {
   @JoinColumn({name: "subtask_id"})
   subtask!: Subtask[];
 
-  @OneToMany(() => Files, (files) => files.task)
+  @OneToMany(() => Files, (files) => files.task, {onDelete: "CASCADE"})
   files!: Files[];
 }

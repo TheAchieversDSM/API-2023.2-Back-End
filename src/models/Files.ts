@@ -31,6 +31,6 @@ export class Files {
   })
   fileSize!: number
 
-  @ManyToOne(() => Task, ( task ) => task.files)
+  @ManyToOne(() => Task, ( task ) => task.files, { onDelete: "CASCADE" })
   task!: Task
 }
