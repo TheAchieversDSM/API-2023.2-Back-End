@@ -324,8 +324,7 @@ class TaskController {
 public async ReasonDeleteTask(req: Request, res: Response) {
   const { id, userId } = req.params;
   const deleteMessage = req.body.deleteMessage;
-  console.log(id, userId, deleteMessage)
-  console.log("oi", deleteMessage)
+  
   try {
       const taskId: number = parseInt(id, 10);
       const userIdNumber: number = parseInt(userId, 10);
@@ -335,10 +334,7 @@ public async ReasonDeleteTask(req: Request, res: Response) {
       }
 
       if(deleteMessage){
-        console.log("deletada")
         const a = await taskService.HistoricDeleteTask(taskId, userIdNumber, deleteMessage);
-        console.log(a)
-
       }
       const task = await TaskService.deleteTask(taskId, userIdNumber);
       res.status(200).json({ message: "Task deleted successfully", data: task });
