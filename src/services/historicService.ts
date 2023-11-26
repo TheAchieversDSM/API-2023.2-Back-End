@@ -142,20 +142,30 @@ class HistoricService {
                 where: { taskId: { $in: taskIds } }
              });
 
-             const grupoDatas: IDynamicKeyData = {};
+             const grupoNames: IDynamicKeyData = {};
              sharedHistorics.sort((a: IHistorico, b: IHistorico) => {
-                 const dataA = new Date(a.data).getTime();
-                 const dataB = new Date(b.data).getTime();
-                 return dataB - dataA;
-             });
-             sharedHistorics.forEach((task) => {
-                 const data = task.data.slice(0, 10);
-                 if (!grupoDatas[data]) {
-                     grupoDatas[data] = [];
-                 }
-                 grupoDatas[data].push(task);
-             });
-             return grupoDatas;
+            const dataA = new Date(a.data).getTime();
+            const dataB = new Date(b.data).getTime();
+            return dataB - dataA;
+        });
+        const listIds = sharedHistorics.map(task => ({ id: task.taskId, name: task.taskName }));
+        sharedHistorics.forEach(task => {
+            let taskName = listIds.filter(filterTask => filterTask.id === task.taskId)[0]?.name;
+            if (taskName) {
+                if (!grupoNames[taskName]) {
+                    grupoNames[taskName] = [];
+                }
+                const existingTask = grupoNames[taskName].find(existing => existing.taskId === task.taskId);
+                if (existingTask) {
+                    grupoNames[taskName] = [...grupoNames[taskName]]
+                    grupoNames[taskName].push(task);
+                } else {
+                    grupoNames[taskName].push(task);
+                }
+            }
+        });
+        
+        return grupoNames;
         } catch (error: any) {
             throw new Error(error);
         }
